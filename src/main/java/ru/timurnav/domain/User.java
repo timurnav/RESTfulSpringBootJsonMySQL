@@ -9,7 +9,8 @@ import javax.persistence.*;
 @Table(name = "users")
 public class User {
 
-    @Id @GeneratedValue
+    @Id
+    @GeneratedValue
     private Long id;
 
     @Column(name = "avatar")
