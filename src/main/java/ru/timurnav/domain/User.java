@@ -1,9 +1,12 @@
 package ru.timurnav.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
+import java.sql.Timestamp;
+import java.util.Date;
 
 @Entity
 @Table(name = "users")
@@ -23,15 +26,23 @@ public class User {
     @Email
     private String email;
 
-    public User(Long id, String internalAvatarURL, String name, String email) {
-        this.id = id;
+    @Column(name = "online")
+    private boolean online;
+
+    @Column(name = "status_timestamp")
+    private Timestamp statusTimestamp;
+
+    public User(@JsonProperty("url") String internalAvatarURL,
+                @JsonProperty("name")String name,
+                @JsonProperty("email")String email) {
         this.internalAvatarURL = internalAvatarURL;
         this.name = name;
         this.email = email;
+        this.online = false;
+        this.statusTimestamp = new Timestamp((new Date()).getTime());
     }
 
-    public User() {
-    }
+    public User(){}
 
     public Long getId() {
         return id;
@@ -63,5 +74,21 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public boolean isOnline() {
+        return online;
+    }
+
+    public void setOnline(boolean online) {
+        this.online = online;
+    }
+
+    public Timestamp getStatusTimestamp() {
+        return statusTimestamp;
+    }
+
+    public void setStatusTimestamp(Timestamp statusTimestamp) {
+        this.statusTimestamp = statusTimestamp;
     }
 }
