@@ -1,32 +1,38 @@
 package ru.timurnav.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ru.timurnav.LoggerWrapper;
 import ru.timurnav.domain.User;
 import ru.timurnav.domain.UserRepository;
+import ru.timurnav.exception.ExceptionUtil;
 
 import javax.validation.Valid;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping(value = "/users")
 public class UserController {
 
-    private final String URI_TEMPLATE = "/images/user_avatar_%d%s";
+    private static final LoggerWrapper LOG = LoggerWrapper.get(UserController.class);
+
+    private final String URI_TEMPLATE = "/user_images/user_avatar_%d%s";
     private final File DIRECTORY = new File("/images");
 
     @Autowired
     UserRepository userRepository;
+
+
+
 
     /**
      * This method returns an User entity with assigned id
@@ -37,8 +43,11 @@ public class UserController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public User get(@PathVariable("id") Long id) {
-        return userRepository.findOne(id);
+        return ExceptionUtil.check(userRepository.findOne(id), id);
     }
+
+
+
 
     /**
      * The request parameters are optional. Parameters are used to filter the list
@@ -68,6 +77,8 @@ public class UserController {
         return userRepository.findAll();
     }
 
+
+
     /**
      * Method is used to save a new User entity to database
      *
@@ -77,9 +88,17 @@ public class UserController {
 
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity create(@Valid @RequestBody User user) {
-        User u = userRepository.saveAndFlush(user);
-        return new ResponseEntity<>(u.getId(), HttpStatus.CREATED);
+        try{
+            User u = userRepository.save(user);
+            return new ResponseEntity<>(u.getId(), HttpStatus.CREATED);
+        } catch (Exception e){
+            LOG.error("abort creating new user. Cause " + e.getMessage());
+            return new ResponseEntity(HttpStatus.FORBIDDEN);
+        }
     }
+
+
+
 
     /**
      * The method changes the status of users,
@@ -106,18 +125,27 @@ public class UserController {
          * Но как это сделать я пока еще не разобрался..
          */
 
-        User user = userRepository.findOne(id);
-        boolean old = user.isOnline();
-        user.setOnline(online);
-        user.setStatusTimestamp(updated);
-        userRepository.saveAndFlush(user);
-        //TODO refactor it!
-        Map<String, Object> map = new LinkedHashMap<>();
-        map.put("id", id);
-        map.put("new", online);
-        map.put("old", old);
-        return new ResponseEntity<>(map, HttpStatus.OK);
+        try {
+            User user = ExceptionUtil.check(userRepository.findOne(id), id);
+            boolean old = user.isOnline();
+            user.setOnline(online);
+            user.setStatusTimestamp(updated);
+            userRepository.saveAndFlush(user);
+            //TODO refactor it!
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("id", id);
+            map.put("new", online);
+            map.put("old", old);
+            return new ResponseEntity<>(map, HttpStatus.OK);
+        } catch (Exception e) {
+            LOG.error("abort status changing. Cause " + e.getMessage());
+            return new ResponseEntity(HttpStatus.FORBIDDEN);
+        }
+
     }
+
+
+
 
     /**
      * Uploading images.
