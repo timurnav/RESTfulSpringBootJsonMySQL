@@ -29,7 +29,9 @@ public class UserController {
     @Autowired
     UserRepository userRepository;
 
-
+    private static final String ERROR_TEMPLATE = "can not upload file %s for user %d. Cause %s";
+    private static final File DIRECTORY = new File(System.getenv("HOME") + "/user_images");
+    private static final String URI_TEMPLATE = DIRECTORY + "/user_avatar_%d%s";
 
 
     /**
@@ -156,14 +158,11 @@ public class UserController {
     public ResponseEntity upload(@PathVariable("id") Long id,
                                  @RequestParam("pic") MultipartFile pic) {
 
-        final String URI_TEMPLATE = "/user_images/user_avatar_%d%s";
-        final String ERROR_TEMPLATE = "can not upload file %s for user %d. Cause %s";
-        final File DIRECTORY = new File("/images");
+        String originalFilename = pic.getOriginalFilename();
 
         if (!pic.isEmpty()) {
             if (pic.getContentType().startsWith("image/")) {
 
-                String originalFilename = pic.getOriginalFilename();
                 String imageName = String.format(URI_TEMPLATE,
                         id,
                         originalFilename.substring(originalFilename.lastIndexOf(".")));
@@ -175,20 +174,20 @@ public class UserController {
                         pic.transferTo(file);
                         return new ResponseEntity<>(file.getAbsolutePath(), HttpStatus.CREATED);
                     }
-                    LOG.error(String.format(ERROR_TEMPLATE, pic, id,"can not create the folder"));
+                    LOG.error(String.format(ERROR_TEMPLATE, originalFilename, id,"can not create the folder"));
                     return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
                 } catch (IOException e) {
-                    LOG.error(String.format(ERROR_TEMPLATE, pic, id, e.getMessage()));
+                    LOG.error(String.format(ERROR_TEMPLATE, originalFilename, id, e.getMessage()));
                     return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
                 }
 
             } else {
-                LOG.error(String.format(ERROR_TEMPLATE, pic, id, "type is unsupported"));
+                LOG.error(String.format(ERROR_TEMPLATE, originalFilename, id, "type is unsupported"));
                 return new ResponseEntity(HttpStatus.RESET_CONTENT);
             }
 
         } else {
-            LOG.error(String.format(ERROR_TEMPLATE, pic, id, "file is empty"));
+            LOG.error(String.format(ERROR_TEMPLATE, originalFilename, id, "file is empty"));
             return new ResponseEntity(HttpStatus.NO_CONTENT);
         }
 
