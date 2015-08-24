@@ -1,7 +1,5 @@
 package ru.timurnav.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -17,16 +15,16 @@ import javax.validation.Valid;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/users")
 public class UserController {
 
     private static final LoggerWrapper LOG = LoggerWrapper.get(UserController.class);
-
-    private final String URI_TEMPLATE = "/user_images/user_avatar_%d%s";
-    private final File DIRECTORY = new File("/images");
 
     @Autowired
     UserRepository userRepository;
@@ -130,7 +128,7 @@ public class UserController {
             boolean old = user.isOnline();
             user.setOnline(online);
             user.setStatusTimestamp(updated);
-            userRepository.saveAndFlush(user);
+            userRepository.save(user);
             //TODO refactor it!
             Map<String, Object> map = new LinkedHashMap<>();
             map.put("id", id);
@@ -158,6 +156,10 @@ public class UserController {
     public ResponseEntity upload(@PathVariable("id") Long id,
                                  @RequestParam("pic") MultipartFile pic) {
 
+        final String URI_TEMPLATE = "/user_images/user_avatar_%d%s";
+        final String ERROR_TEMPLATE = "can not upload file %s for user %d. Cause %s";
+        final File DIRECTORY = new File("/images");
+
         if (!pic.isEmpty()) {
             if (pic.getContentType().startsWith("image/")) {
 
@@ -169,19 +171,26 @@ public class UserController {
                 File file = new File(imageName);
 
                 try {
-                    if (!DIRECTORY.exists()) DIRECTORY.mkdirs();
-                    pic.transferTo(file);
+                    if (!DIRECTORY.exists() && DIRECTORY.mkdirs()){
+                        pic.transferTo(file);
+                        return new ResponseEntity<>(file.getAbsolutePath(), HttpStatus.CREATED);
+                    }
+                    LOG.error(String.format(ERROR_TEMPLATE, pic, id,"can not create the folder"));
+                    return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
                 } catch (IOException e) {
+                    LOG.error(String.format(ERROR_TEMPLATE, pic, id, e.getMessage()));
                     return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
                 }
 
-                return new ResponseEntity<>(file.getAbsolutePath(), HttpStatus.CREATED);
-
-            } else
+            } else {
+                LOG.error(String.format(ERROR_TEMPLATE, pic, id, "type is unsupported"));
                 return new ResponseEntity(HttpStatus.RESET_CONTENT);
+            }
 
-        } else
+        } else {
+            LOG.error(String.format(ERROR_TEMPLATE, pic, id, "file is empty"));
             return new ResponseEntity(HttpStatus.NO_CONTENT);
+        }
 
     }
 
