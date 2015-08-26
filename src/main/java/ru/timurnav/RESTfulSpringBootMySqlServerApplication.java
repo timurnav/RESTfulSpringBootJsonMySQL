@@ -26,7 +26,7 @@ public class RESTfulSpringBootMySqlServerApplication {
         if (imagesDirectory.isDirectory() && imagesDirectory.canWrite()) {
             directory = imagesDirectory.getAbsolutePath() + File.separator;
         } else {
-            LOG.error("Incorrect directory for uploading images");
+            LOG.error("Incorrect directory for uploaded images");
             throw new IllegalArgumentException("Please specify a correct multipart.location in " +
                     "application.properties. It should be an existing directory for uploading images");
         }

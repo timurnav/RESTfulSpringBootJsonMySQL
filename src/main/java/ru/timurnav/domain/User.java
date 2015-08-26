@@ -32,18 +32,6 @@ public class User {
     @Column(name = "status_timestamp")
     private Timestamp statusTimestamp;
 
-    public User(@JsonProperty("url") String internalAvatarURL,
-                @JsonProperty("name")String name,
-                @JsonProperty("email")String email) {
-        this.internalAvatarURL = internalAvatarURL;
-        this.name = name;
-        this.email = email;
-        this.online = false;
-        this.statusTimestamp = new Timestamp((new Date()).getTime());
-    }
-
-    public User(){}
-
     public Long getId() {
         return id;
     }

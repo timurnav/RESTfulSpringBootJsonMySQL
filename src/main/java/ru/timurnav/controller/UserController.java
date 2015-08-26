@@ -1,6 +1,7 @@
 package ru.timurnav.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -12,10 +13,9 @@ import ru.timurnav.repository.UserRepository;
 import ru.timurnav.to.StatusResponse;
 import ru.timurnav.util.OuterRequest;
 
-import javax.validation.Valid;
 import java.sql.Timestamp;
 import java.util.Date;
-import java.util.List;
+import java.util.concurrent.Callable;
 
 @RestController
 @RequestMapping(value = "/users")
@@ -50,7 +50,7 @@ public class UserController {
      */
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<User> getAll(@RequestParam(value = "online", required = false) Boolean online,
+    public Iterable<User> getAll(@RequestParam(value = "online", required = false) Boolean online,
                              @RequestParam(value = "id", required = false) Long id
 //                             @RequestParam(value = "id", required = false) Timestamp timestamp
     ) {
@@ -71,19 +71,22 @@ public class UserController {
     /**
      * Method is used to save a new User entity to database
      *
-     * @param user - user serialized in JSON
      * @return ResponseEntity, contains an HttpStatus and ID of the created user
      */
 
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity create(@Valid @RequestBody User user) {
-        try {
-            User u = userRepository.save(user);
-            return new ResponseEntity<>(u.getId(), HttpStatus.CREATED);
-        } catch (Exception e) {
-            LOG.error("abort creating new user. Cause " + e.getMessage());
-            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public Callable<ResponseEntity> create(@RequestBody User user) {
+        return () -> {
+            Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+            Thread.yield();
+            try {
+                User u = userRepository.save(user);
+                return new ResponseEntity<>(u.getId(), HttpStatus.CREATED);
+            } catch (Exception e) {
+                LOG.error("abort creating new user. Cause " + e.getMessage());
+                return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        };
     }
 
 
@@ -98,31 +101,34 @@ public class UserController {
      * old - old status
      */
 
-    @RequestMapping(method = RequestMethod.PUT)
-    public ResponseEntity changeStatus(@RequestParam("id") Long id,
-                                       @RequestParam("online") boolean current) {
+    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
+    public Callable<ResponseEntity> changeStatus(@PathVariable("id") Long id,
+                                                 @RequestParam("online") Boolean current) {
+        return () -> {
+            Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+            Thread.yield();
 
-        Timestamp updateTime = new Timestamp((new Date()).getTime());
+            Timestamp updateTime = new Timestamp((new Date()).getTime());
 
-        OuterRequest.sendOuterRequest();
+            OuterRequest.sendOuterRequest();
 
-        try {
-            User user = ExceptionUtil.check(userRepository.findOne(id), id);
-            boolean old = user.isOnline();
-            user.setOnline(current);
-            user.setStatusTimestamp(updateTime);
-            userRepository.save(user);
-            StatusResponse sr = new StatusResponse()
-                    .setId(id)
-                    .setOldStatus(old)
-                    .setCurrentStatus(current);
+            try {
+                User user = ExceptionUtil.check(userRepository.findOne(id), id);
+                boolean old = user.isOnline();
+                user.setOnline(current);
+                user.setStatusTimestamp(updateTime);
+                userRepository.save(user);
+                StatusResponse sr = new StatusResponse()
+                        .setId(id)
+                        .setOldStatus(old)
+                        .setCurrentStatus(current);
 
-            return new ResponseEntity<>(sr, HttpStatus.OK);
-        } catch (Exception e) {
-            LOG.error("abort status changing. Cause " + e.getMessage());
-            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
+                return new ResponseEntity<>(sr, HttpStatus.OK);
+            } catch (Exception e) {
+                LOG.error("abort status changing. Cause " + e.getMessage());
+                return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        };
     }
 
 }
