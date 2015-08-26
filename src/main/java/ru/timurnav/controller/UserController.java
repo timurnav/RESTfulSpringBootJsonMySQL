@@ -5,20 +5,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import ru.timurnav.LoggerWrapper;
 import ru.timurnav.domain.User;
-import ru.timurnav.domain.UserRepository;
 import ru.timurnav.exception.ExceptionUtil;
+import ru.timurnav.repository.UserRepository;
+import ru.timurnav.to.StatusResponse;
+import ru.timurnav.util.OuterRequest;
 
 import javax.validation.Valid;
-import java.io.File;
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/users")
@@ -28,11 +25,6 @@ public class UserController {
 
     @Autowired
     UserRepository userRepository;
-
-    private static final String ERROR_TEMPLATE = "can not upload file %s for user %d. Cause %s";
-    private static final File DIRECTORY = new File(System.getenv("HOME") + "/user_images");
-    private static final String URI_TEMPLATE = DIRECTORY + "/user_avatar_%d%s";
-
 
     /**
      * This method returns an User entity with assigned id
@@ -45,8 +37,6 @@ public class UserController {
     public User get(@PathVariable("id") Long id) {
         return ExceptionUtil.check(userRepository.findOne(id), id);
     }
-
-
 
 
     /**
@@ -78,7 +68,6 @@ public class UserController {
     }
 
 
-
     /**
      * Method is used to save a new User entity to database
      *
@@ -88,23 +77,21 @@ public class UserController {
 
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity create(@Valid @RequestBody User user) {
-        try{
+        try {
             User u = userRepository.save(user);
             return new ResponseEntity<>(u.getId(), HttpStatus.CREATED);
-        } catch (Exception e){
+        } catch (Exception e) {
             LOG.error("abort creating new user. Cause " + e.getMessage());
-            return new ResponseEntity(HttpStatus.FORBIDDEN);
+            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-
 
 
     /**
      * The method changes the status of users,
      *
-     * @param id     - to identify the user in database
-     * @param online - new status of user, should be true/false
+     * @param id      - to identify the user in database
+     * @param current - new status of user, should be true/false
      * @return ResponseEntity with an HttpStatus and contains in ResponseBody
      * id - id of user,
      * new - new status,
@@ -113,82 +100,27 @@ public class UserController {
 
     @RequestMapping(method = RequestMethod.PUT)
     public ResponseEntity changeStatus(@RequestParam("id") Long id,
-                                       @RequestParam("online") boolean online) {
+                                       @RequestParam("online") boolean current) {
 
-        Timestamp updated = new Timestamp((new Date()).getTime());
+        Timestamp updateTime = new Timestamp((new Date()).getTime());
 
-        /**
-         * Here we should create a request to outer API.
-         * We send a request, and this thread is falling asleep,
-         * when we receive a response we create a new Callable.
-         *
-         * Но как это сделать я пока еще не разобрался..
-         */
+        OuterRequest.sendOuterRequest();
 
         try {
             User user = ExceptionUtil.check(userRepository.findOne(id), id);
             boolean old = user.isOnline();
-            user.setOnline(online);
-            user.setStatusTimestamp(updated);
+            user.setOnline(current);
+            user.setStatusTimestamp(updateTime);
             userRepository.save(user);
-            //TODO refactor it!
-            Map<String, Object> map = new LinkedHashMap<>();
-            map.put("id", id);
-            map.put("new", online);
-            map.put("old", old);
-            return new ResponseEntity<>(map, HttpStatus.OK);
+            StatusResponse sr = new StatusResponse()
+                    .setId(id)
+                    .setOldStatus(old)
+                    .setCurrentStatus(current);
+
+            return new ResponseEntity<>(sr, HttpStatus.OK);
         } catch (Exception e) {
             LOG.error("abort status changing. Cause " + e.getMessage());
-            return new ResponseEntity(HttpStatus.FORBIDDEN);
-        }
-
-    }
-
-
-
-
-    /**
-     * Uploading images.
-     *
-     * @param id  - user's id
-     * @param pic - the image
-     * @return the ResponseEntity with HttpStatus and the String with
-     */
-    @RequestMapping(value = "/{id}/upload", method = RequestMethod.POST)
-    public ResponseEntity upload(@PathVariable("id") Long id,
-                                 @RequestParam("pic") MultipartFile pic) {
-
-        String originalFilename = pic.getOriginalFilename();
-
-        if (!pic.isEmpty()) {
-            if (pic.getContentType().startsWith("image/")) {
-
-                String imageName = String.format(URI_TEMPLATE,
-                        id,
-                        originalFilename.substring(originalFilename.lastIndexOf(".")));
-
-                File file = new File(imageName);
-
-                try {
-                    if (!DIRECTORY.exists() && DIRECTORY.mkdirs()){
-                        pic.transferTo(file);
-                        return new ResponseEntity<>(file.getAbsolutePath(), HttpStatus.CREATED);
-                    }
-                    LOG.error(String.format(ERROR_TEMPLATE, originalFilename, id,"can not create the folder"));
-                    return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
-                } catch (IOException e) {
-                    LOG.error(String.format(ERROR_TEMPLATE, originalFilename, id, e.getMessage()));
-                    return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
-                }
-
-            } else {
-                LOG.error(String.format(ERROR_TEMPLATE, originalFilename, id, "type is unsupported"));
-                return new ResponseEntity(HttpStatus.RESET_CONTENT);
-            }
-
-        } else {
-            LOG.error(String.format(ERROR_TEMPLATE, originalFilename, id, "file is empty"));
-            return new ResponseEntity(HttpStatus.NO_CONTENT);
+            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
     }
