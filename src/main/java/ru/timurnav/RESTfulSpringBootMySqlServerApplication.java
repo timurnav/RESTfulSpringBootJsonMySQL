@@ -4,14 +4,19 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.web.MultipartProperties;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import java.io.File;
 
 @SpringBootApplication
+@EnableJpaRepositories
+@ComponentScan
 public class RESTfulSpringBootMySqlServerApplication {
 
     private static final LoggerWrapper LOG = LoggerWrapper.get(RESTfulSpringBootMySqlServerApplication.class);
 
+    //TODO refactor with @Autowired
     private static String directory;
 
     public static String getDirectory() {

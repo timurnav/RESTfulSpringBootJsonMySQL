@@ -5,8 +5,6 @@ import ru.timurnav.domain.User;
 import java.sql.Timestamp;
 
 public class UserTestData {
-    private static final LoggerWrapper LOG = LoggerWrapper.get(UserTestData.class);
-    
     public static final long USER_ID = 1;
 
     public static final String REST_USER_URL = "/users/";

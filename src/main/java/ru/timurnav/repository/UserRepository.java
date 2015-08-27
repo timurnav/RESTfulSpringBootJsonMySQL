@@ -7,7 +7,6 @@ import ru.timurnav.domain.User;
 import java.sql.Timestamp;
 import java.util.List;
 
-@Repository
 public interface UserRepository extends CrudRepository<User, Long> {
 
     List<User> findByOnlineAndStatusTimestampAfter (boolean online, Timestamp statusTimestamp);
