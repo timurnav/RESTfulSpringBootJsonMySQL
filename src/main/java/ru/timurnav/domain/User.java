@@ -12,7 +12,7 @@ public class User {
 
     @Id
     @GeneratedValue
-    private Long id;
+    private long id;
 
     @Column(name = "avatar")
     private String internalAvatarURL;
@@ -30,51 +30,57 @@ public class User {
     @Column(name = "status_timestamp")
     private Timestamp statusTimestamp;
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public User setId(Long id) {
         this.id = id;
+        return this;
     }
 
     public String getInternalAvatarURL() {
         return internalAvatarURL;
     }
 
-    public void setInternalAvatarURL(String internalAvatarURL) {
+    public User setInternalAvatarURL(String internalAvatarURL) {
         this.internalAvatarURL = internalAvatarURL;
+        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public User setName(String name) {
         this.name = name;
+        return this;
     }
 
     public String getEmail() {
         return email;
     }
 
-    public void setEmail(String email) {
+    public User setEmail(String email) {
         this.email = email;
+        return this;
     }
 
     public boolean isOnline() {
         return online;
     }
 
-    public void setOnline(boolean online) {
+    public User setOnline(boolean online) {
         this.online = online;
+        return this;
     }
 
     public Timestamp getStatusTimestamp() {
         return statusTimestamp;
     }
 
-    public void setStatusTimestamp(Timestamp statusTimestamp) {
+    public User setStatusTimestamp(Timestamp statusTimestamp) {
         this.statusTimestamp = statusTimestamp;
+        return this;
     }
 }
