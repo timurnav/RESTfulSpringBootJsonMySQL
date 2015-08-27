@@ -15,7 +15,7 @@ public class User {
     private long id;
 
     @Column(name = "avatar")
-    private String internalAvatarURL;
+    private String url;
 
     @Length(min = 2)
     private String name;
@@ -39,12 +39,12 @@ public class User {
         return this;
     }
 
-    public String getInternalAvatarURL() {
-        return internalAvatarURL;
+    public String getUrl() {
+        return url;
     }
 
-    public User setInternalAvatarURL(String internalAvatarURL) {
-        this.internalAvatarURL = internalAvatarURL;
+    public User setUrl(String url) {
+        this.url = url;
         return this;
     }
 
@@ -82,5 +82,17 @@ public class User {
     public User setStatusTimestamp(Timestamp statusTimestamp) {
         this.statusTimestamp = statusTimestamp;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", url='" + url + '\'' +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", online=" + online +
+                ", statusTimestamp=" + statusTimestamp +
+                '}';
     }
 }

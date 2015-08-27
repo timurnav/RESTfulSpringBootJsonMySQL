@@ -48,18 +48,6 @@
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
 
-        <!--JSON-->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson-json.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-hibernate4</artifactId>
-            <version>${jackson-json.version}</version>
-        </dependency>
-
     </dependencies>
 
     <build>

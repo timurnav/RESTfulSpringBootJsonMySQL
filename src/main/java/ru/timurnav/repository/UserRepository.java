@@ -1,7 +1,6 @@
 package ru.timurnav.repository;
 
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
 import ru.timurnav.domain.User;
 
 import java.sql.Timestamp;

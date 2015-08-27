@@ -80,7 +80,9 @@ public class UserController {
             Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
             Thread.yield();
             try {
+                System.out.println(user);
                 User u = userRepository.save(user);
+                System.out.println(u);
                 return new ResponseEntity<>(u.getId(), HttpStatus.CREATED);
             } catch (Exception e) {
                 LOG.error("abort creating new user. Cause " + e.getMessage());
