@@ -20,17 +20,17 @@ public class RESTfulSpringBootMySqlServerApplication {
 
     public static void main(String[] args) {
         ConfigurableApplicationContext ctx = SpringApplication.run(RESTfulSpringBootMySqlServerApplication.class, args);
-        LOG.debug("Test directory for images");
+
         MultipartProperties p = ctx.getBean(MultipartProperties.class);
         File imagesDirectory = new File(p.getLocation());
-        if (imagesDirectory.isDirectory() && imagesDirectory.canWrite()) {
-            directory = imagesDirectory.getAbsolutePath() + File.separator;
-        } else {
+
+        if (!imagesDirectory.isDirectory() || !imagesDirectory.canWrite()) {
             LOG.error("Incorrect directory for uploaded images");
             throw new IllegalArgumentException("Please specify a correct multipart.location in " +
                     "application.properties. It should be an existing directory for uploading images");
         }
-        LOG.debug("Test directory is ok!");
+        directory = imagesDirectory.getAbsolutePath() + File.separator;
+        System.out.println("ok, let's work!");
     }
 
 }

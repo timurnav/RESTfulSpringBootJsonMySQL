@@ -1,7 +1,6 @@
 package ru.timurnav.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -44,14 +43,14 @@ public class UserController {
      * of users in response body.
      *
      * @param online filters users by status online/offline
-     * @param id     is the Timestamp, in case it presents, the request contains only
-     *               users whose status is changed after this timestamp
+     * @param id     is the Timestamp, in case it presents, the request contains
+     *               users whose status is changed after this timestamp only
      * @return List of users
      */
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public Iterable<User> getAll(@RequestParam(value = "online", required = false) Boolean online,
-                             @RequestParam(value = "id", required = false) Long id
+                                 @RequestParam(value = "id", required = false) Long id
 //                             @RequestParam(value = "id", required = false) Timestamp timestamp
     ) {
 //        if (timestamp != null) {
@@ -71,6 +70,7 @@ public class UserController {
     /**
      * Method is used to save a new User entity to database
      *
+     * @param user receive user as Json
      * @return ResponseEntity, contains an HttpStatus and ID of the created user
      */
 

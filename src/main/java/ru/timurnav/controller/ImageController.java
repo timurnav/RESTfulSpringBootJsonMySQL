@@ -22,6 +22,7 @@ public class ImageController {
 
     private static final String ERROR_TEMPLATE = "Can not upload file %s. Cause %s";
 
+
     /**
      * Uploading images.
      * <p>
@@ -30,6 +31,7 @@ public class ImageController {
      * @param pic - the image
      * @return the ResponseEntity with HttpStatus and the String with
      */
+
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
     public Callable<ResponseEntity> upload(@RequestParam("pic") MultipartFile pic) {
         return () -> {

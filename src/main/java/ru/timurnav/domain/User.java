@@ -1,12 +1,10 @@
 package ru.timurnav.domain;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
-import java.util.Date;
 
 @Entity
 @Table(name = "users")
@@ -19,7 +17,7 @@ public class User {
     @Column(name = "avatar")
     private String internalAvatarURL;
 
-    @Length(min = 5)
+    @Length(min = 2)
     private String name;
 
     @Column(unique = true)
