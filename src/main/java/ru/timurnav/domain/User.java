@@ -34,7 +34,7 @@ public class User {
         return id;
     }
 
-    public User setId(Long id) {
+    public User setId(long id) {
         this.id = id;
         return this;
     }
@@ -87,8 +87,7 @@ public class User {
     @Override
     public String toString() {
         return "User{" +
-                "id=" + id +
-                ", url='" + url + '\'' +
+                "url='" + url + '\'' +
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
                 ", online=" + online +

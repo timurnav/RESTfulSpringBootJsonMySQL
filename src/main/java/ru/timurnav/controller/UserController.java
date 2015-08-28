@@ -14,6 +14,7 @@ import ru.timurnav.util.OuterRequest;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 @RestController
@@ -49,7 +50,7 @@ public class UserController {
      */
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Iterable<User> getAll(@RequestParam(value = "online", required = false) Boolean online,
+    public List<User> getAll(@RequestParam(value = "online", required = false) Boolean online,
                                  @RequestParam(value = "id", required = false) Long id
 //                             @RequestParam(value = "id", required = false) Timestamp timestamp
     ) {
@@ -80,9 +81,7 @@ public class UserController {
             Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
             Thread.yield();
             try {
-                System.out.println(user);
                 User u = userRepository.save(user);
-                System.out.println(u);
                 return new ResponseEntity<>(u.getId(), HttpStatus.CREATED);
             } catch (Exception e) {
                 LOG.error("abort creating new user. Cause " + e.getMessage());
@@ -90,7 +89,6 @@ public class UserController {
             }
         };
     }
-
 
     /**
      * The method changes the status of users,
