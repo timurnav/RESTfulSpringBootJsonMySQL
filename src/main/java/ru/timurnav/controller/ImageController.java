@@ -11,8 +11,6 @@ import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
-import static ru.timurnav.RESTfulSpringBootMySqlServerApplication.getDirectory;
-
 @RestController
 @RequestMapping(value = "/images")
 public class ImageController {
