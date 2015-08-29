@@ -12,8 +12,10 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import ru.timurnav.RESTfulSpringBootMySqlServerApplication;
+import ru.timurnav.domain.User;
 import ru.timurnav.matcher.JsonUtil;
 import ru.timurnav.repository.UserRepository;
+import ru.timurnav.to.StatusResponse;
 
 import javax.annotation.PostConstruct;
 
@@ -49,7 +51,7 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MATCHER.contentMatcher(USER));
+                .andExpect(USER_MATCHER.contentMatcher(USER));
     }
 
     @Test
@@ -58,14 +60,45 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MATCHER.contentListMatcher(ALL_USERS));
+                .andExpect(USER_MATCHER.contentListMatcher(ALL_USERS));
+    }
+
+    @Test
+    public void testGetAllOnline() throws Exception {
+        mockMvc.perform(get(REST_URL)
+                .param("online", "true"))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(USER_MATCHER.contentListMatcher(USER));
+    }
+
+    @Test
+    public void testGetAllAfterTimestamp() throws Exception {
+        mockMvc.perform(get(REST_URL)
+                .param("id", "1377430227000"))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(USER_MATCHER.contentListMatcher(ALL_USERS.get(1)));
+    }
+
+    @Test
+    public void testGetAllOnlineAfterTimestamp() throws Exception {
+        mockMvc.perform(get(REST_URL)
+                .param("id", "1377430227000")
+                .param("online", "true"))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(USER_MATCHER.contentListMatcher());//empty list
     }
 
     @Test
     public void testCreate() throws Exception {
 
-        mockMvc.perform(get(REST_URL))
-                .andExpect(MATCHER.contentAbsentMatcher(CREATED_USER));
+        mockMvc.perform(post(REST_URL))
+                .andExpect(USER_MATCHER.contentAbsentMatcher(CREATED_USER));
 
         MvcResult mvcResult = mockMvc.perform(post(REST_URL)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -74,9 +107,9 @@ public class UserControllerTest {
                 .andReturn();
 // http://stackoverflow.com/questions/18053703/spring-mvc-test-framework-returning-inconsistent-results-for-async-controller-te
         mvcResult.getAsyncResult();
-
         MvcResult mvcAsyncResult = mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isCreated())
+//it don't work .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andReturn();
 
@@ -85,14 +118,42 @@ public class UserControllerTest {
                 .getContentAsString());
 
         CREATED_USER.setId(newId);
-        MATCHER.assertEquals(CREATED_USER, userRepository.findOne(newId));
+        USER_MATCHER.assertEquals(CREATED_USER, userRepository.findOne(newId));
 
         ALL_USERS.add(CREATED_USER);
-        MATCHER.assertListEquals(ALL_USERS, userRepository.findAll());
+        USER_MATCHER.assertListEquals(ALL_USERS, userRepository.findAll());
 
+        ALL_USERS.remove(2);
+        userRepository.delete(3l);
     }
 
+    @Test
     public void testChangeStatus() throws Exception {
+
+        User u = userRepository.findOne(USER_ID);
+
+        boolean newStatus = !u.isOnline();
+
+        StatusResponse expectedResponce = new StatusResponse()
+                .setId(USER_ID)
+                .setCurrentStatus(newStatus)
+                .setOldStatus(u.isOnline());
+
+        MvcResult mvcResult = mockMvc.perform(put(REST_URL + USER_ID)
+                .param("online", newStatus + ""))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mvcResult.getAsyncResult();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+//                .andExpect(STATUS_RESP_MATCHER.contentMatcher(expectedResponce))
+        ;
+
+        userRepository.save(USER);
 
     }
 }

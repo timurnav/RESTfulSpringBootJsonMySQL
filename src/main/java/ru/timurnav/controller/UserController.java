@@ -51,7 +51,7 @@ public class UserController {
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<User> getAll(@RequestParam(value = "online", required = false) Boolean online,
-                                 @RequestParam(value = "id", required = false) Long id
+                             @RequestParam(value = "id", required = false) Long id
 //                             @RequestParam(value = "id", required = false) Timestamp timestamp
     ) {
 //        if (timestamp != null) {
@@ -75,7 +75,9 @@ public class UserController {
      * @return ResponseEntity, contains an HttpStatus and ID of the created user
      */
 
-    @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.POST,
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     public Callable<ResponseEntity> create(@RequestBody User user) {
         return () -> {
             Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
@@ -101,7 +103,8 @@ public class UserController {
      * old - old status
      */
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
+    @RequestMapping(value = "/{id}", method = RequestMethod.PUT,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     public Callable<ResponseEntity> changeStatus(@PathVariable("id") Long id,
                                                  @RequestParam("online") Boolean current) {
         return () -> {

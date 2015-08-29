@@ -2,6 +2,7 @@ package ru.timurnav;
 
 import ru.timurnav.domain.User;
 import ru.timurnav.matcher.ModelMatcher;
+import ru.timurnav.to.StatusResponse;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -37,5 +38,8 @@ public class UserTestData {
                     .setStatusTimestamp(Timestamp.valueOf("2014-08-25 14:30:27"))
     ));
 
-    public static final ModelMatcher<User, String> MATCHER = new ModelMatcher<>(Object::toString, User.class);
+    public static final ModelMatcher<User, String> USER_MATCHER =
+            new ModelMatcher<>(Object::toString, User.class);
+    public static final ModelMatcher<StatusResponse, String> STATUS_RESP_MATCHER =
+            new ModelMatcher<>(Object::toString, StatusResponse.class);
 }
