@@ -105,11 +105,11 @@ public class UserControllerTest {
                 .content(JsonUtil.writeValue(CREATED_USER)))
                 .andExpect(request().asyncStarted())
                 .andReturn();
-// http://stackoverflow.com/questions/18053703/spring-mvc-test-framework-returning-inconsistent-results-for-async-controller-te
         mvcResult.getAsyncResult();
         MvcResult mvcAsyncResult = mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isCreated())
-//it don't work .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+//it don't work
+//                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andReturn();
 
@@ -134,17 +134,17 @@ public class UserControllerTest {
 
         boolean newStatus = !u.isOnline();
 
-        StatusResponse expectedResponce = new StatusResponse()
-                .setId(USER_ID)
-                .setCurrentStatus(newStatus)
-                .setOldStatus(u.isOnline());
-
         MvcResult mvcResult = mockMvc.perform(put(REST_URL + USER_ID)
                 .param("online", newStatus + ""))
                 .andExpect(request().asyncStarted())
                 .andReturn();
 
         mvcResult.getAsyncResult();
+
+        StatusResponse expectedResponce = new StatusResponse()
+                .setId(USER_ID)
+                .setCurrentStatus(newStatus)
+                .setOldStatus(u.isOnline());
 
         mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk())

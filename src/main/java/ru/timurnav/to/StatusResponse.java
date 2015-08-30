@@ -6,6 +6,9 @@ public class StatusResponse {
     private boolean currentStatus;
     private Long id;
 
+    public StatusResponse() {
+    }
+
     public StatusResponse setOldStatus(boolean oldStatus) {
         this.oldStatus = oldStatus;
         return this;

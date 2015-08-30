@@ -65,16 +65,4 @@ public class ImageController {
 
 
     }
-/*
-
-    @RequestMapping(value = "/{imageName:.+}", method = RequestMethod.GET)
-    public ResponseEntity getImage(@PathVariable String imageName){
-        File f = new File(getDirectory() + imageName);
-
-        if (f.isFile() && f.canRead()){
-            return new ResponseEntity<>(HttpStatus.OK);
-        }
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
-    }
-*/
 }

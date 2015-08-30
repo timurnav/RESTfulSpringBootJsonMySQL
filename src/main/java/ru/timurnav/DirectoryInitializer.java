@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 
 @Component
-public class UserCommandLineRunner implements CommandLineRunner {
+public class DirectoryInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
