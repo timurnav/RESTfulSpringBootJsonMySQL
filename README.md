@@ -3,6 +3,7 @@ Server Api
 To start server you must specify an existing directory for uploaded images in application.properties
 
 Activity of server:
+
 1. URL: "/users":
   1.1 GET request returns all users from database, format JSON array.
   GET can be with optional parameters:
