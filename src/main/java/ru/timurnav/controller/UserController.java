@@ -76,8 +76,7 @@ public class UserController {
      */
 
     @RequestMapping(method = RequestMethod.POST,
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+            consumes = MediaType.APPLICATION_JSON_VALUE)
     public Callable<ResponseEntity> create(@RequestBody User user) {
         return () -> {
             Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
