@@ -4,6 +4,7 @@ import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
 
 @Entity
@@ -18,10 +19,12 @@ public class User {
     private String url;
 
     @Length(min = 2)
+    @NotNull
     private String name;
 
     @Column(unique = true)
     @Email
+    @NotNull
     private String email;
 
     @Column(name = "online")

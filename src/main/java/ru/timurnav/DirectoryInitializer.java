@@ -18,8 +18,15 @@ public class DirectoryInitializer implements CommandLineRunner {
                     "application.properties. It should be an existing directory for uploading images");
         }
         System.out.println("directory is ok, let's work!");
+        directory = mp.getLocation() + File.separator;
     }
 
     @Autowired
     MultipartProperties mp;
+
+    private static String directory;
+
+    public static String getDirectory() {
+        return directory;
+    }
 }
