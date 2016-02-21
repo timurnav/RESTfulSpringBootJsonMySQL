@@ -1,6 +1,8 @@
 package ru.timurnav.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,12 +34,11 @@ public class UserController {
      * @param id - id of user in database
      * @return user
      */
-
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Order(Ordered.HIGHEST_PRECEDENCE)
     public User get(@PathVariable("id") Long id) {
         return ExceptionUtil.check(userRepository.findOne(id), id);
     }
-
 
     /**
      * The request parameters are optional. Parameters are used to filter the list
@@ -48,13 +49,11 @@ public class UserController {
      *               users whose status is changed after this timestamp only
      * @return List of users
      */
-
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Order(Ordered.HIGHEST_PRECEDENCE)
     public List<User> getAll(@RequestParam(value = "online", required = false) Boolean online,
                              @RequestParam(value = "id", required = false) Long id
-//                             @RequestParam(value = "id", required = false) Timestamp timestamp
     ) {
-//        if (timestamp != null) {
         if (id != null) {
             Timestamp timestamp = new Timestamp(id);
             if (online != null) {
@@ -74,14 +73,12 @@ public class UserController {
      * @param user receive user as Json
      * @return ResponseEntity, contains an HttpStatus and ID of the created user
      */
-
     @RequestMapping(method = RequestMethod.POST,
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
+    @Order
     public Callable<ResponseEntity> create(@RequestBody User user) {
         return () -> {
-            Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-            Thread.yield();
             try {
                 User u = userRepository.save(user);
                 return new ResponseEntity<>(u.getId(), HttpStatus.CREATED);
@@ -102,15 +99,12 @@ public class UserController {
      * new - new status,
      * old - old status
      */
-
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
+    @Order
     public Callable<ResponseEntity> changeStatus(@PathVariable("id") Long id,
                                                  @RequestParam("online") Boolean current) {
         return () -> {
-            Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-            Thread.yield();
-
             Timestamp updateTime = new Timestamp((new Date()).getTime());
 
             OuterRequest.sendOuterRequest();

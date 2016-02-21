@@ -1,8 +1,12 @@
 package ru.timurnav.controller;
 
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import ru.timurnav.LoggerWrapper;
 
@@ -15,11 +19,9 @@ import java.util.concurrent.Callable;
 @RequestMapping(value = "/images")
 public class ImageController {
 
-
-    private static final LoggerWrapper LOG = LoggerWrapper.get(UserController.class);
+    private static final LoggerWrapper LOG = LoggerWrapper.get(ImageController.class);
 
     private static final String ERROR_TEMPLATE = "Can not upload file %s. Cause %s";
-
 
     /**
      * Uploading images.
@@ -29,8 +31,8 @@ public class ImageController {
      * @param pic - the image
      * @return the ResponseEntity with HttpStatus and the String with
      */
-
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
+    @Order
     public Callable<ResponseEntity> upload(@RequestParam("pic") MultipartFile pic) {
         return () -> {
             Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
