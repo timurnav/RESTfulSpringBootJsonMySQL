@@ -8,13 +8,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import ru.timurnav.DirectoryInitializer;
 import ru.timurnav.LoggerWrapper;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
@@ -67,12 +64,5 @@ public class ImageController {
                 return new ResponseEntity<>("Empty file", HttpStatus.NO_CONTENT);
             }
         };
-    }
-
-    @RequestMapping(value = "/{imageName}")
-    public MultipartFile getImage(@PathVariable String imageName){
-        Path path = Paths.get(DirectoryInitializer.getDirectory() + imageName);
-
-        return null;//TODO return not null
     }
 }
